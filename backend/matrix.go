@@ -3,14 +3,11 @@ package main
 import (
 	"errors"
 	"fmt"
-	"math"
+	"math/big"
 )
 
-const epsilon = 1e-12
-
-// ValidateSquare returns an error unless m is a non-empty square matrix
-// containing only finite values.
-func ValidateSquare(m [][]float64) error {
+// ValidateSquareRat returns an error unless m is a non-empty square matrix.
+func ValidateSquareRat(m [][]*big.Rat) error {
 	n := len(m)
 	if n == 0 {
 		return errors.New("matrix must not be empty")
@@ -19,56 +16,60 @@ func ValidateSquare(m [][]float64) error {
 		if len(row) != n {
 			return fmt.Errorf("row %d has length %d, expected %d", i, len(row), n)
 		}
-		for _, v := range row {
-			if math.IsNaN(v) || math.IsInf(v, 0) {
-				return errors.New("matrix contains non-finite values")
+		for j, v := range row {
+			if v == nil {
+				return fmt.Errorf("nil entry at [%d][%d]", i, j)
 			}
 		}
 	}
 	return nil
 }
 
-// Determinant computes det(a) via Gaussian elimination with partial
-// pivoting. O(n^3). Returns 0 for singular matrices.
-func Determinant(a [][]float64) (float64, error) {
-	if err := ValidateSquare(a); err != nil {
-		return 0, err
+// DeterminantRat computes det(a) exactly using rational arithmetic. if too slow could change to Bareiss algorithm (fraction-free Gaussian elimination)
+// Gaussian elimination with partial pivoting. No floating-point rounding.
+func DeterminantRat(a [][]*big.Rat) (*big.Rat, error) {
+	if err := ValidateSquareRat(a); err != nil {
+		return nil, err
 	}
 
 	n := len(a)
-	m := make([][]float64, n)
+	m := make([][]*big.Rat, n)
 	for i := range a {
-		m[i] = make([]float64, n)
-		copy(m[i], a[i])
+		m[i] = make([]*big.Rat, n)
+		for j := range a[i] {
+			m[i][j] = new(big.Rat).Set(a[i][j])
+		}
 	}
 
-	det := 1.0
+	det := big.NewRat(1, 1)
+	zero := new(big.Rat)
+
 	for col := 0; col < n; col++ {
-		// Partial pivoting: pick the largest magnitude entry in this column.
-		pivot := col
-		for r := col + 1; r < n; r++ {
-			if math.Abs(m[r][col]) > math.Abs(m[pivot][col]) {
+		// Find a non-zero pivot in this column.
+		pivot := -1
+		for r := col; r < n; r++ {
+			if m[r][col].Cmp(zero) != 0 {
 				pivot = r
+				break
 			}
 		}
-		if math.Abs(m[pivot][col]) < epsilon {
-			return 0, nil // singular
+		if pivot == -1 {
+			return new(big.Rat), nil // singular
 		}
 		if pivot != col {
 			m[pivot], m[col] = m[col], m[pivot]
-			det = -det
+			det.Neg(det)
 		}
 
-		det *= m[col][col]
+		det.Mul(det, m[col][col])
+
 		for r := col + 1; r < n; r++ {
-			factor := m[r][col] / m[col][col]
-			if factor == 0 {
-				continue
-			}
+			factor := new(big.Rat).Quo(m[r][col], m[col][col])
 			for c := col; c < n; c++ {
-				m[r][c] -= factor * m[col][c]
+				m[r][c].Sub(m[r][c], new(big.Rat).Mul(factor, m[col][c]))
 			}
 		}
 	}
+
 	return det, nil
 }

@@ -20,7 +20,7 @@
       @for (cell of row; track $index; let j = $index) {
         <input
           type="number"
-          [value]="cell"
+          [value]="cell ?? ''"
           (change)="setCell(i, j, $any($event.target).value)"
         />
       }

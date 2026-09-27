@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface DeterminantResponse {
-  determinant: number;
+  determinant: string;
 }
 
 @Injectable({ providedIn: 'root' })

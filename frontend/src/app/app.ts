@@ -22,7 +22,7 @@ export class App {
 
   readonly size = signal(3);
   readonly matrix = signal<(number | null)[][]>(emptyMatrix(3));
-  readonly result = signal<number | null>(null);
+  readonly result = signal<string | null>(null);
   readonly error = signal<string | null>(null);
   readonly loading = signal(false);
 
@@ -62,7 +62,7 @@ export class App {
     this.resetOutput();
   }
 
-  fillEmptyWithZero(): void {
+  private fillEmptyWithZero(): void {
     this.matrix.update((m) =>
       m.map((row) => row.map((v) => (v === null ? 0 : v))),
     );
@@ -73,10 +73,10 @@ export class App {
     this.error.set(null);
     this.result.set(null);
 
-    // Empty cells are treated as 0 when sending to the server.
-    const payload = this.matrix().map((row) => row.map((v) => v ?? 0));
+    // Fill any empty cells with 0 first, then send the matrix as-is.
+    this.fillEmptyWithZero();
 
-    this.matrixService.determinant(payload).subscribe({
+    this.matrixService.determinant(this.matrix() as number[][]).subscribe({
       next: (res) => {
         this.result.set(res.determinant);
         this.loading.set(false);
