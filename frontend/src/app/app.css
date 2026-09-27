@@ -1,0 +1,70 @@
+.app {
+  max-width: 40rem;
+  margin: 3rem auto;
+  font-family: system-ui, sans-serif;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.size-field {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.size-field input {
+  width: 4rem;
+}
+
+.matrix {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.matrix input {
+  width: 100%;
+  padding: 0.4rem;
+  text-align: center;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 0.95rem;
+}
+
+.actions {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+button {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  cursor: pointer;
+}
+
+button.primary {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #fff;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.result {
+  font-size: 1.15rem;
+}
+
+.error {
+  color: #b91c1c;
+}

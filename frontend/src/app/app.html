@@ -1,0 +1,45 @@
+<main class="app">
+  <h1>Matrix Determinant</h1>
+
+  <label class="size-field">
+    Size
+    <input
+      type="number"
+      [min]="minSize"
+      [max]="maxSize"
+      [value]="size()"
+      (change)="onSizeChange($any($event.target).value)"
+    />
+  </label>
+
+  <div
+    class="matrix"
+    [style.grid-template-columns]="'repeat(' + size() + ', 4.5rem)'"
+  >
+    @for (row of matrix(); track $index; let i = $index) {
+      @for (cell of row; track $index; let j = $index) {
+        <input
+          type="number"
+          [value]="cell"
+          (change)="setCell(i, j, $any($event.target).value)"
+        />
+      }
+    }
+  </div>
+
+  <div class="actions">
+    <button type="button" (click)="randomize()">Randomize</button>
+    <button type="button" (click)="clear()">Clear</button>
+    <button type="button" class="primary" (click)="calculate()" [disabled]="loading()">
+      {{ loading() ? 'Calculating…' : 'Calculate determinant' }}
+    </button>
+  </div>
+
+  @if (error()) {
+    <p class="error">{{ error() }}</p>
+  }
+
+  @if (result() !== null) {
+    <p class="result">det = <strong>{{ result() }}</strong></p>
+  }
+</main>
